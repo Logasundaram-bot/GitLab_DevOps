@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: nodejs-app
+
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+
+    spec:
+      containers:
+        - name: nodejs-app
+          image: acrprod237.azurecr.io/nodejs-app:latest
+          ports:
+            - containerPort: 5000

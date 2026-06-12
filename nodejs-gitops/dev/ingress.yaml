@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodejs-app-ingress
+  namespace: nodejs-dev
+  annotations:
+    appgw.ingress.kubernetes.io/backend-path-prefix: /
+spec:
+  ingressClassName: azure-application-gateway
+  rules:
+    - host: app.test.devops.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nodejs-app-svc
+                port:
+                  number: 80
