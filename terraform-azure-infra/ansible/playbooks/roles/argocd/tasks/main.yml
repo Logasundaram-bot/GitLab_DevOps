@@ -1,0 +1,34 @@
+
+    - name: Add Helm repo for Argo CD
+      kubernetes.core.helm_repository:
+        name: argo
+        repo_url: https://argoproj.github.io/argo-helm
+        state: present
+    - name: Install or upgrade Argo CD via Helm
+      kubernetes.core.helm:
+        name: argocd
+        chart_ref: argo/argo-cd
+        release_namespace: argocd
+        create_namespace: true
+        values:
+          global:
+            domain: ""
+          configs: 
+            params: 
+              server.insecure: "true"
+          server:
+            service:
+              type: ClusterIP 
+            ingress:
+              enabled: true 
+              annotations:
+                appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+              ingressClassName: azure-application-gateway
+              hostname: "argocd.test.devops.com"
+              path: /
+              tls: false
+        state: present
+    - name: Apply ArgoCD application
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ playbook_dir }}/k8s/argocd-app.yaml"

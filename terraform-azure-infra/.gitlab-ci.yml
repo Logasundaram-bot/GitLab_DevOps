@@ -1,0 +1,144 @@
+stages:
+  - state_file_storage
+  - terraform_validate
+  - terraform_plan
+  - terraform_apply
+  - aks_deployment
+  - terraform_destroy
+
+variables:
+  KEYVAULT_NAME: "taskiKeyVault"
+
+cache:
+  paths:
+    - terraform/.terraform
+
+.terraform_base:
+  image:
+    name: hashicorp/terraform:1.6
+    entrypoint: [""]
+  before_script:
+    - cd terraform
+# -----------------------------
+# Terraform State Storage
+# -----------------------------
+tf_state_storage:
+  stage: state_file_storage
+  image: mcr.microsoft.com/azure-cli:2.50.0
+  script:
+    - echo "CLIENT_ID=$ARM_CLIENT_ID"
+    - echo "CLIENT_SECRET=$ARM_CLIENT_SECRET"
+    - echo "TENANT_ID=$ARM_TENANT_ID"
+    - echo "RG=$TF_STATE_RG"
+    - az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
+    - az group create --name "$TF_STATE_RG" --location "$LOCATION"
+    - az storage account create --name "$TF_STATE_ACCOUNT" --resource-group "$TF_STATE_RG" --location "$LOCATION" --sku Standard_LRS
+    - az storage container create --name "$TF_STATE_CONTAINER" --account-name "$TF_STATE_ACCOUNT"
+# -----------------------------
+# Terraform Validate
+# -----------------------------
+terraform_validate:
+  stage: terraform_validate
+  extends: .terraform_base
+  script:
+    - terraform init -backend=false
+    - terraform validate
+
+# -----------------------------
+# Terraform Plan
+# -----------------------------
+terraform_plan:
+  stage: terraform_plan
+  extends: .terraform_base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      variables:
+        TFVARS_FILE: "prod.tfvars"
+        TFSTATE_KEY: "prod/aks.terraform.tfstate"
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+      variables:
+        TFVARS_FILE: "dev.tfvars"
+        TFSTATE_KEY: "dev/aks.terraform.tfstate"
+  script:
+    - |
+      terraform init -reconfigure \
+        -backend-config="resource_group_name=$TF_STATE_RG" \
+        -backend-config="storage_account_name=$TF_STATE_ACCOUNT" \
+        -backend-config="container_name=$TF_STATE_CONTAINER" \
+        -backend-config="key=$TFSTATE_KEY"
+    - terraform plan -var-file=$TFVARS_FILE 
+
+# -----------------------------
+# Terraform Apply
+# -----------------------------
+terraform_apply:
+  stage: terraform_apply
+  extends: .terraform_base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+      variables:
+        TFVARS_FILE: "prod.tfvars"
+        TFSTATE_KEY: "prod/aks.terraform.tfstate"
+    - when: on_success
+      variables:
+        TFVARS_FILE: "dev.tfvars"
+        TFSTATE_KEY: "dev/aks.terraform.tfstate"
+  script:
+    - |
+      terraform init -reconfigure \
+        -backend-config="resource_group_name=$TF_STATE_RG" \
+        -backend-config="storage_account_name=$TF_STATE_ACCOUNT" \
+        -backend-config="container_name=$TF_STATE_CONTAINER" \
+        -backend-config="key=$TFSTATE_KEY"
+    - terraform apply -auto-approve -var-file=$TFVARS_FILE
+    - echo "AKS_CLUSTER_NAME=$(terraform output -raw aks_cluster_name)" >> ../tf.env
+    - echo "ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)" >> ../tf.env
+    - terraform output -raw kube_config | base64 -w 0 > ../kubeconfig.yaml
+  artifacts:
+    reports:
+      dotenv: tf.env
+    paths:
+      - kubeconfig.yaml
+
+# -----------------------------
+# AKS Deployment
+# -----------------------------
+aks_deployment:
+  stage: aks_deployment
+  image: python:3.11
+  before_script:
+    - pip install ansible kubernetes
+    - ansible-galaxy collection install kubernetes.core community.kubernetes
+    - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    - base64 -d kubeconfig.yaml > kubeconfig
+    - export KUBECONFIG=$(pwd)/kubeconfig
+  script:
+    - ansible-playbook ansible/playbooks/aks-addons.yml
+
+# -----------------------------
+# Terraform Destroy
+# -----------------------------
+terraform_destroy:
+  stage: terraform_destroy
+  extends: .terraform_base
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+      variables:
+        TFVARS_FILE: "prod.tfvars"
+        TFSTATE_KEY: "prod/aks.terraform.tfstate"
+    - when: manual
+      variables:
+        TFVARS_FILE: "dev.tfvars"
+        TFSTATE_KEY: "dev/aks.terraform.tfstate"
+  when: manual
+  script:
+    - |
+      terraform init -reconfigure \
+        -backend-config="resource_group_name=$TF_STATE_RG" \
+        -backend-config="storage_account_name=$TF_STATE_ACCOUNT" \
+        -backend-config="container_name=$TF_STATE_CONTAINER" \
+        -backend-config="key=dev/aks.terraform.tfstate"
+    - terraform destroy -auto-approve -var-file=$TFVARS_FILE
+

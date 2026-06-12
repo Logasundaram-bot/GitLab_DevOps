@@ -1,0 +1,8 @@
+- name: Configure AKS Add-ons
+  hosts: localhost
+  gather_facts: false
+  collections:
+        - community.kubernetes
+        - kubernetes.core
+  roles:
+    - argocd
