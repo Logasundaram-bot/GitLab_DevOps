@@ -8,8 +8,7 @@ spec:
   source:
     repoURL: https://gitlab.com/taski-devops-assessment/nodejs-gitops.git
     targetRevision: main
-    path: applications
-
+    path: nodejs-gitops/applications
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
