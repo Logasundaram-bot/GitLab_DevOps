@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://gitlab.com/taski-devops-assessment/nodejs-gitops.git
+    repoURL: https://github.com/Logasundaram-bot/gitlab_devops.git
     targetRevision: main
-    path: dev
+    path: nodejs-gitops/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: nodejs-dev
