@@ -1,0 +1,63 @@
+stages:
+  - build
+  - test
+  - security
+  - dockerize
+  - push
+  - deploy
+
+variables:
+  IMAGE_NAME: nodejs-app
+  IMAGE_TAG: latest
+
+build:
+  stage: build
+  image: node:20
+  script:
+    - npm install
+
+test:
+  stage: test
+  image: node:20
+  script:
+    - npm install
+    - npm test
+
+npm_audit:
+  stage: security
+  image: node:20
+  script: 
+    - npm audit fix || true
+    - npm audit --audit-level=critical
+
+trivy_scan:
+  stage: security
+  image:
+    name: aquasec/trivy
+    entrypoint: [""]
+  script:
+    - trivy fs .
+
+docker_build:
+  stage: dockerize
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - docker build -t "$ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG" .
+    - docker save $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG -o image.tar
+  artifacts:
+    paths:
+      - image.tar
+    expire_in: 1 day
+
+push_acr:
+  stage: push
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - echo "$ACR_PASSWORD" | docker login $ACR_LOGIN_SERVER -u "$ACR_USERNAME" --password-stdin
+    - docker load -i image.tar
+    - docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:$IMAGE_TAG
+
