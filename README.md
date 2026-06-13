@@ -149,6 +149,10 @@ Deploy New Application Version
 
 ---
 
+## validation
+Deployed application can be exposed using Azure DNS:
+<img width="653" height="262" alt="image" src="https://github.com/user-attachments/assets/71c1850d-23d2-491e-a199-5fba4f770df8" />
+
 ## Key Features
 
 * Infrastructure as Code using Terraform
