@@ -41,11 +41,19 @@ The solution follows the **App of Apps (Parent-Child Application)** pattern, whe
                              v
                  Parent Application (Root App)
                              |
+                             v
+                 
           ------------------------------------------------
           |                      |                       |
           v                      v                       v
     Child App 1           Child App 2            Child App 3
-   Node.js App          Monitoring Stack         Ingress Stack
+   FrontEnd App          BankEnd Stack         DataBase Stack
+     +--> Deploy Pod  
+     |
+     +--> Create Service
+     |
+     +--> Create Ingress
+
 ```
 
 ---
