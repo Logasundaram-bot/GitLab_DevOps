@@ -61,8 +61,7 @@ Azure Infrastructure
 | terraform_validate | Validates Terraform configuration         |
 | terraform_plan     | Generates execution plan                  | 
 | terraform_apply    | Deploys infrastructure to Azure           |
-| ansible playbook   | Cluster bootstrap and add-on installation |
-|                    | of ArgoCD are automated using Ansible     | 
+| ansible playbook   | AKS Cluster bootstrap and installation  of ArgoCD add-on are automated using Ansible    | 
 | terraform_destroy  | Optional infrastructure cleanup           |
 
 <img width="1366" height="565" alt="image" src="https://github.com/user-attachments/assets/d5210fad-68e0-41c4-a150-24d45c8a67bc" />
