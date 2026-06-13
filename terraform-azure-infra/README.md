@@ -42,9 +42,14 @@ Azure Infrastructure
    ├── VNet & Subnets
    ├── AKS Cluster
    ├── ACR
+   ├── AGIC
    ├── Application Gateway
    └── Azure DNS
-   └── ArgoCD server
+   │
+   ▼
+AKS cluster bootstrap
+   └── ArgoCD Server
+   
 ```
 ## Prerequisites
 
