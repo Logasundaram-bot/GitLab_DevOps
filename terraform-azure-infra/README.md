@@ -43,7 +43,14 @@ Azure Infrastructure
    ├── Application Gateway
    └── Azure DNS
 ```
+## Prerequisites
 
+* Terraform
+* Azure Subscription
+* GitLab Runner
+* Azure Service Principal
+* GitLab CI/CD Variables
+  
 ## CI/CD Pipeline Stages
 
 | Stage              | Description                       |
@@ -54,21 +61,18 @@ Azure Infrastructure
 | terraform_destroy  | Optional infrastructure cleanup   |
 <img width="1366" height="565" alt="image" src="https://github.com/user-attachments/assets/d5210fad-68e0-41c4-a150-24d45c8a67bc" />
 
-
-## Prerequisites
-
-* Terraform
-* Azure Subscription
-* GitLab Runner
-* Azure Service Principal
-* GitLab CI/CD Variables
-
 ## Security
 
 * Azure credentials stored as GitLab Protected Variables
 * Remote state stored securely in Azure Storage Account
 * No hardcoded secrets in source code
 * RBAC-based access control
+  
+## Azure Authentication in Pipeline
+
+* To allow GitLab CI/CD to provision and manage Azure resources, a Service Principal is created in Azure and its credentials are stored securely as GitLab Protected and Masked Variables.
+<img width="803" height="456" alt="image" src="https://github.com/user-attachments/assets/f07f0ce3-870f-470c-b7fe-62a797248c92" />
+
 
 ## Benefits
 
