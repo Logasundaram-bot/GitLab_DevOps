@@ -106,6 +106,8 @@ After AKS is provisioned, Ansible is used to configure the cluster and install p
 
 The project follows the App of Apps model.
 
+<img width="1054" height="459" alt="image" src="https://github.com/user-attachments/assets/29acd1ac-001c-4c1c-8800-531bf675a4a9" />
+
 ### Parent Application
 
 The parent application acts as the entry point for all deployments.
