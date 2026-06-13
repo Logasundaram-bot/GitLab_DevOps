@@ -30,6 +30,12 @@ Developer Commit
        v
 GitLab CI/CD
        |
+       +--> Build Application
+       |
+       +--> Run Tests
+       |
+       +--> Security Scan
+       |
        +--> Build Docker Image
        |
        +--> Push Image to ACR
@@ -112,29 +118,7 @@ EXPOSE 5000
 CMD ["npm", "start"]
 ```
 
----
 
-## Running Locally
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Start Application
-
-```bash
-npm start
-```
-
-Application will be available at:
-
-```text
-http://localhost:5000
-```
-
----
 
 ## Azure Authentication in Pipeline
 
