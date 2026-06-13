@@ -64,6 +64,8 @@ Deploy New Version
 ---
 
 ## CI/CD Pipeline Stages
+<img width="1054" height="339" alt="image" src="https://github.com/user-attachments/assets/73bf99b3-0b3c-46df-8860-3f76a31e3fad" />
+
 
 ### Build
 
