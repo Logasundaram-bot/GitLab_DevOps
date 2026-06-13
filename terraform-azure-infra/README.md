@@ -48,7 +48,8 @@ Azure Infrastructure
    │
    ▼
 AKS cluster bootstrap
-   └── ArgoCD Server
+   ├── ArgoCD Server
+   └── Parent Application (Root App)
    
 ```
 ## Prerequisites
