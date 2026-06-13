@@ -94,6 +94,7 @@ Azure Infrastructure
 * GitLab CI/CD
 * Azure Kubernetes Service (AKS)
 * Azure Container Registry (ACR)
+* Application Gateway Ingress Controller(AGIC)
 * Azure DNS
 * Application Gateway
 * ArgoCD
